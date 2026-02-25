@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-// backend URL from Vercel environment variable
-const API_URL = process.env.REACT_APP_API_URL;
+function Contact() {
 
-const Contact = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -12,9 +10,7 @@ const Contact = () => {
   });
 
   const [status, setStatus] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  // handle input change
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -22,101 +18,81 @@ const Contact = () => {
     });
   };
 
-  // submit form
   const onSubmit = async (e) => {
     e.preventDefault();
 
-    setLoading(true);
-    setStatus("Sending...");
-
     try {
-      await axios.post(`${API_URL}/contact`, formData, {
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
+      const res = await axios.post(
+        "https://pratik-dev.onrender.com/contact",
+        formData
+      );
 
-      setStatus("Message sent successfully ✅ I will contact you soon.");
+      if (res.data.success) {
+        setStatus("Message sent successfully ✅");
+        setFormData({ name: "", email: "", message: "" });
+      }
 
-      // clear form
-      setFormData({
-        name: "",
-        email: "",
-        message: ""
-      });
-
-    } catch (error) {
-      console.error(error);
-      setStatus("Failed to send ❌ Server may be waking up. Try again in 20 seconds.");
+    } catch (err) {
+      setStatus("Server waking up... try again in 20 seconds ⏳");
     }
-
-    setLoading(false);
   };
 
   return (
-    <section id="contact" className="py-20 bg-gray-900 text-white">
-      <div className="max-w-4xl mx-auto px-6">
+    <div className="min-h-screen flex justify-center items-center bg-[#020617] text-white px-4">
 
-        <h2 className="text-4xl font-bold text-center mb-12">
+      <form
+        onSubmit={onSubmit}
+        className="bg-[#0f172a] p-8 rounded-2xl shadow-xl w-full max-w-xl"
+      >
+
+        <h2 className="text-3xl font-bold mb-6 text-center text-blue-400">
           Contact Me
         </h2>
 
-        <form
-          onSubmit={onSubmit}
-          className="bg-gray-800 p-8 rounded-2xl shadow-lg space-y-6"
+        <input
+          type="text"
+          name="name"
+          placeholder="Your Name"
+          value={formData.name}
+          onChange={handleChange}
+          className="w-full mb-4 p-3 rounded-lg bg-[#1e293b]"
+          required
+        />
+
+        <input
+          type="email"
+          name="email"
+          placeholder="Your Email"
+          value={formData.email}
+          onChange={handleChange}
+          className="w-full mb-4 p-3 rounded-lg bg-[#1e293b]"
+          required
+        />
+
+        <textarea
+          name="message"
+          placeholder="Your Message"
+          value={formData.message}
+          onChange={handleChange}
+          rows="5"
+          className="w-full mb-4 p-3 rounded-lg bg-[#1e293b]"
+          required
+        ></textarea>
+
+        <button
+          type="submit"
+          className="w-full bg-blue-500 hover:bg-blue-600 p-3 rounded-lg font-semibold"
         >
+          Send Message
+        </button>
 
-          {/* Name */}
-          <input
-            type="text"
-            name="name"
-            placeholder="Your Name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="w-full p-3 rounded-lg bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+        {status && (
+          <p className="text-green-400 mt-4 text-center">{status}</p>
+        )}
 
-          {/* Email */}
-          <input
-            type="email"
-            name="email"
-            placeholder="Your Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="w-full p-3 rounded-lg bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-
-          {/* Message */}
-          <textarea
-            name="message"
-            rows="5"
-            placeholder="Your Message"
-            value={formData.message}
-            onChange={handleChange}
-            required
-            className="w-full p-3 rounded-lg bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-
-          {/* Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 transition-all duration-300 p-3 rounded-lg font-semibold disabled:opacity-50"
-          >
-            {loading ? "Sending..." : "Send Message"}
-          </button>
-
-          {/* Status */}
-          {status && (
-            <p className="text-center mt-4 text-lg">{status}</p>
-          )}
-
-        </form>
-      </div>
-    </section>
+      </form>
+    </div>
   );
-};
+}
 
 export default Contact;
