@@ -60,35 +60,54 @@ app.post("/contact", async (req, res) => {
   }
 });
 
-/* ---------------- CHATBOT ROUTE (Groq AI) ---------------- */
+/* ---------------- CHATBOT ROUTE ---------------- */
+
 const Groq = require("groq-sdk");
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+// IMPORTANT: check if key exists
+const GROQ_KEY = process.env.GROQ_API_KEY;
+
+if (!GROQ_KEY) {
+  console.log("❌ GROQ_API_KEY NOT FOUND in environment variables");
+}
+
+const groq = new Groq({
+  apiKey: GROQ_KEY
+});
 
 app.post("/chat", async (req, res) => {
   try {
     const userMessage = req.body.message;
+
+    if (!userMessage) {
+      return res.status(400).json({
+        reply: "Please type a message."
+      });
+    }
+
+    console.log("User message:", userMessage);
 
     const completion = await groq.chat.completions.create({
       messages: [
         {
           role: "system",
           content: `
-You are a professional AI assistant for Pratik, a MERN Stack Developer.
+You are Pratik's personal AI portfolio assistant.
 
-Details:
-Name: Pratik
-Location: Bengaluru, India
-Skills: React, Node.js, MongoDB, JavaScript, Java, Python
+About Pratik:
+- MERN Stack Developer
+- Location: Bengaluru, India
+- Skills: React, Node.js, MongoDB, JavaScript, Java, Python
 
 Projects:
 1. FilmyAdda - OTT movie website
-2. TextFlow - text formatting tool
-3. FlappyBird - python game
+2. TextFlow - Text formatting tool
+3. FlappyBird - Python game
 
-Contact:
+If someone asks contact:
 Email: pratikmungaravadi8296@gmail.com
 
-Answer politely and professionally like a portfolio assistant.
+Speak professionally and concisely.
 `
         },
         {
@@ -96,16 +115,30 @@ Answer politely and professionally like a portfolio assistant.
           content: userMessage
         }
       ],
-      model: "llama3-70b-8192"
+
+      model: "llama3-70b-8192",
+      temperature: 0.7,
+      max_tokens: 500
     });
 
-    res.json({
-      reply: completion.choices[0].message.content
+    const reply = completion.choices[0].message.content;
+
+    console.log("AI reply generated");
+
+    res.status(200).json({
+      reply: reply
     });
 
   } catch (error) {
-    console.log("AI Error:", error);
-    res.status(500).json({ reply: "AI server error" });
+
+    // THIS WILL SHOW THE REAL ERROR IN RENDER LOGS
+    console.error("🔥 GROQ ERROR:");
+    console.error(error);
+
+    // Instead of crashing frontend, send safe message
+    res.status(200).json({
+      reply: "AI server is starting... please try again in 20 seconds ⏳"
+    });
   }
 });
 
