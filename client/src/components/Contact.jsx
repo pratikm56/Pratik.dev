@@ -38,7 +38,7 @@ function Contact() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-[#020617] text-white px-4">
+    <div className="min-h-screen flex justify-center items-center bg-[#020617] text-white px-4" id="contact">
 
       <form
         onSubmit={onSubmit}
