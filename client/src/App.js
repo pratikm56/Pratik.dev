@@ -4,7 +4,6 @@ import About from "./components/About";
 import Skills from "./components/Skills";
 import Projects from "./components/Projects";
 import Contact from "./components/Contact";
-// import Chabot from "./components/Chabot";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { useEffect } from "react";
@@ -29,7 +28,6 @@ function App() {
       <Projects />
       <Education />
       <Contact />
-      {/* <Chabot /> */}
       <Footer />
     </div>
   );
