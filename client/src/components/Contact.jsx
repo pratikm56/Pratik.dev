@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
 
+// backend URL from Vercel environment variable
 const API_URL = process.env.REACT_APP_API_URL;
 
 const Contact = () => {
-
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -12,6 +12,7 @@ const Contact = () => {
   });
 
   const [status, setStatus] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // handle input change
   const handleChange = (e) => {
@@ -25,10 +26,17 @@ const Contact = () => {
   const onSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      const res = await axios.post(`${API_URL}/Contact`, formData);
+    setLoading(true);
+    setStatus("Sending...");
 
-      setStatus("Message sent successfully ✅");
+    try {
+      await axios.post(`${API_URL}/contact`, formData, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+
+      setStatus("Message sent successfully ✅ I will contact you soon.");
 
       // clear form
       setFormData({
@@ -39,15 +47,17 @@ const Contact = () => {
 
     } catch (error) {
       console.error(error);
-      setStatus("Failed to send message ❌ (Server may be waking up)");
+      setStatus("Failed to send ❌ Server may be waking up. Try again in 20 seconds.");
     }
+
+    setLoading(false);
   };
 
   return (
     <section id="contact" className="py-20 bg-gray-900 text-white">
       <div className="max-w-4xl mx-auto px-6">
 
-        <h2 className="text-4xl font-bold text-center mb-10">
+        <h2 className="text-4xl font-bold text-center mb-12">
           Contact Me
         </h2>
 
@@ -92,12 +102,13 @@ const Contact = () => {
           {/* Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 transition-all duration-300 p-3 rounded-lg font-semibold"
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 transition-all duration-300 p-3 rounded-lg font-semibold disabled:opacity-50"
           >
-            Send Message
+            {loading ? "Sending..." : "Send Message"}
           </button>
 
-          {/* Status Message */}
+          {/* Status */}
           {status && (
             <p className="text-center mt-4 text-lg">{status}</p>
           )}
