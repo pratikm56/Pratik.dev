@@ -13,11 +13,16 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const app = express();
 
 // 3️⃣ MIDDLEWARE
+const cors = require("cors");
+
 app.use(cors({
-  origin: "*",
+  origin: [
+    "http://localhost:3000",
+    "https://pratik-dev.vercel.app"
+  ],
   methods: ["GET", "POST"],
+  credentials: true
 }));
-app.use(express.json());
 
 // 4️⃣ TEST ROUTE
 app.get("/", (req, res) => {
