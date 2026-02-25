@@ -1,53 +1,48 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 const nodemailer = require("nodemailer");
 const Groq = require("groq-sdk");
 require("dotenv").config();
 
 const app = express();
 
-/* ------------------ CORS FIX (Vercel + Localhost) ------------------ */
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://pratik-dev.vercel.app" // <-- replace if your vercel link is different
-];
-
-const cors = require("cors");
-
+/* ================= CORS (FINAL FIX) =================
+   Allows your Vercel site + localhost
+   Also prevents browser blocking requests
+*/
 app.use(cors({
   origin: [
     "http://localhost:3000",
     "https://pratik-dev-five.vercel.app"
   ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST"],
   credentials: true
 }));
 
 app.use(express.json());
 
-/* ------------------ MongoDB Connection ------------------ */
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch(err => console.log("MongoDB Connection Error:", err));
+/* ================= MongoDB ================= */
 
-/* ------------------ Contact Model ------------------ */
+mongoose.connect(process.env.MONGO_URI)
+.then(() => console.log("MongoDB Connected"))
+.catch(err => console.log("MongoDB Error:", err));
+
+/* ================= Contact Model ================= */
+
 const Contact = require("./models/Contact");
 
-/* ------------------ Email Setup (Render Compatible) ------------------ */
+/* ================= Email Setup ================= */
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
-  port: 587,
-  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  },
-  tls: {
-    rejectUnauthorized: false
   }
 });
 
-transporter.verify((error, success) => {
+transporter.verify((error) => {
   if (error) {
     console.log("SMTP ERROR:", error);
   } else {
@@ -55,35 +50,39 @@ transporter.verify((error, success) => {
   }
 });
 
-/* ------------------ Contact Route ------------------ */
-app.post("/Contact", async (req, res) => {
+/* ================= Contact Route ================= */
+
+app.post("/contact", async (req, res) => {
   try {
     const { name, email, message } = req.body;
 
+    // Save to MongoDB
     const newContact = new Contact({ name, email, message });
     await newContact.save();
 
+    // Send email
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: process.env.EMAIL_USER,
       subject: "New Portfolio Contact Message",
       html: `
-        <h3>New Message from Portfolio</h3>
+        <h2>New Contact Message</h2>
         <p><b>Name:</b> ${name}</p>
         <p><b>Email:</b> ${email}</p>
-        <p><b>Message:</b><br/> ${message}</p>
+        <p><b>Message:</b><br>${message}</p>
       `
     });
 
     res.json({ msg: "Message sent successfully" });
 
   } catch (err) {
-    console.log(err);
+    console.log("Contact Error:", err);
     res.status(500).json({ msg: "Server Error" });
   }
 });
 
-/* ------------------ GROQ AI Chatbot ------------------ */
+/* ================= GROQ AI CHATBOT ================= */
+
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY
 });
@@ -97,22 +96,31 @@ app.post("/chat", async (req, res) => {
         {
           role: "system",
           content: `
-You are a professional AI assistant for Pratik, a MERN Stack Developer.
+You are Pratik's professional AI portfolio assistant.
 
-Details:
-Name: Pratik
+Your job:
+Help recruiters understand his skills and projects quickly.
+
+About Pratik:
 Location: Bengaluru, India
-Skills: Java, JavaScript, React, Node.js, MongoDB, Python
+Role: MERN Stack Developer
+
+Skills:
+React, Node.js, Express.js, MongoDB, JavaScript, Java, Python, Tailwind CSS, REST APIs, Git/GitHub, Deployment
 
 Projects:
-1. FilmyAdda - OTT movie web app
-2. TextFlow - Text formatting tool
-3. FlappyBird - Python game
+1. AI Portfolio Website (with chatbot)
+2. FilmyAdda movie web app
+3. TextFlow formatting tool
+4. FlappyBird Python game
 
 Contact Email: pratikmungaravadi8296@gmail.com
 
-Answer politely and professionally like a personal portfolio assistant.
-          `
+Rules:
+- Keep answers short (3-5 lines)
+- Be professional and polite
+- Encourage recruiter to contact him
+`
         },
         {
           role: "user",
@@ -126,17 +134,19 @@ Answer politely and professionally like a personal portfolio assistant.
     res.json({ reply });
 
   } catch (error) {
-    console.log("Groq error:", error);
+    console.log("Groq Error:", error);
     res.status(500).json({ reply: "AI server error" });
   }
 });
 
-/* ------------------ Health Route (Important for Render) ------------------ */
+/* ================= Health Check Route ================= */
+
 app.get("/", (req, res) => {
   res.send("Portfolio Server Running");
 });
 
-/* ------------------ Server Start ------------------ */
+/* ================= Start Server ================= */
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
