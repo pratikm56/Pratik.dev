@@ -1,6 +1,6 @@
 🌐 Pratik.dev — Personal Portfolio Website
 A full-stack developer portfolio built using the MERN Stack to showcase my projects, technical skills, and contact details.
-🔗 Live Website: https://pratik-dev-five.vercel.app
+🔗 Live Website: https://pratik-dev-liart.vercel.app/
 🔗 Backend API: https://pratik-dev.onrender.com
 
 👨‍💻 About Me
