@@ -9,20 +9,30 @@ const nodemailer = require("nodemailer");
 const Groq = require("groq-sdk");
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
+//middleware
+const cors = require("cors");
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://pratik-dev.vercel.app"
+];
+
+app.use(cors({
+  origin: function(origin, callback){
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){
+      return callback(new Error("CORS policy blocked this origin."), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true
+}));
+
 // 2️⃣ APP
 const app = express();
 
-// 3️⃣ MIDDLEWARE
-const cors = require("cors");
 
-app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://pratik-dev.vercel.app"
-  ],
-  methods: ["GET", "POST"],
-  credentials: true
-}));
+
 
 // 4️⃣ TEST ROUTE
 app.get("/", (req, res) => {
