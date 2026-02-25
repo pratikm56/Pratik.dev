@@ -26,7 +26,7 @@ const Contact = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post(`${API_URL}/contact`, formData);
+      const res = await axios.post(`${API_URL}/Contact`, formData);
 
       setStatus("Message sent successfully ✅");
 
