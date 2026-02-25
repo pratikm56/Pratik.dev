@@ -33,11 +33,10 @@ export default function Hero() {
         </div>
 
       <p className="mt-6 max-w-2xl text-gray-400">
-        Motivated Software Developer with a strong foundation in Java, Python, and
-        JavaScript. Experienced in designing responsive, AI-integrated web
-        applications and deploying cloud-native database solutions using Microsoft
-        Azure. Seeking to leverage analytical problem-solving skills and full-stack
-        expertise to drive impactful software projects and contribute to innovative development teams.
+      <i>
+      I’m a full-stack developer who enjoys turning ideas into real, usable products.
+I build responsive web applications, integrate AI features, and design backend APIs that actually work in production.
+My focus is not just writing code — but solving problems, improving user experience, and delivering clean, maintainable solutions using the MERN stack and modern tools.</i>
       </p>
 
       {/* Buttons */}

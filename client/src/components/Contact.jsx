@@ -28,7 +28,7 @@ function Contact() {
       );
 
       if (res.data.success) {
-        setStatus("Message sent successfully ✅");
+        setStatus("Thank you for your message! It has been sent successfully ✅ I'll get back to you soon!");
         setFormData({ name: "", email: "", message: "" });
       }
 
