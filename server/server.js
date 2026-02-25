@@ -19,14 +19,14 @@ app.use(express.json());
 // 2. DATABASE CONNECTION
 // ==========================================
 // Uses the environment variable to keep your password safe!
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGO_URI = process.env.MONGO_URI;
 
-if (MONGODB_URI) {
-    mongoose.connect(MONGODB_URI)
+if (MONGO_URI) {
+    mongoose.connect(MONGO_URI)
         .then(() => console.log('✅ Successfully connected to MongoDB Atlas'))
         .catch((err) => console.error('❌ MongoDB connection error:', err.message));
 } else {
-    console.warn('⚠️ No MONGODB_URI found. Database is NOT connected.');
+    console.warn('⚠️ No MONGO_URI found. Database is NOT connected.');
 }
 
 // ==========================================
