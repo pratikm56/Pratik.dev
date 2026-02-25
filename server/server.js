@@ -72,7 +72,7 @@ if (!GROQ_KEY) {
 }
 
 const groq = new Groq({
-  apiKey: GROQ_API_KEY
+  apiKey: GROQ_KEY
 });
 
 app.post("/chat", async (req, res) => {
