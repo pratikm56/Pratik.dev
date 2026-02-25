@@ -34,6 +34,10 @@ export default function Navbar() {
             Projects
           </a>
 
+          <a href="#education" className="hover:text-blue-400 transition">
+            Education
+          </a>
+
           <a href="#contact" className="hover:text-blue-400 transition">
             Contact
           </a>

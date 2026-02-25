@@ -11,12 +11,9 @@ const app = express();
    Allow your Vercel site + local testing
 */
 app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://pratik-dev-five.vercel.app"
-  ],
-  methods: ["GET", "POST"],
-  credentials: true
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type"]
 }));
 
 app.use(express.json());
