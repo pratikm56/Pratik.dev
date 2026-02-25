@@ -30,8 +30,8 @@ mongoose.connect(process.env.MONGO_URI)
 
 /* ================= Contact Model ================= */
 
-const Contact = require("./models/Contact");
-
+const Contact = require("./models/contact");
+S
 /* ================= Email Setup ================= */
 
 const transporter = nodemailer.createTransport({
