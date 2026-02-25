@@ -15,7 +15,7 @@ export default function Contact() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await axios.post("http://localhost:5000/contact", form);
+    await axios.post("http://localhost:5000/Contact", form);
     alert("Message sent!");
     setForm({name:"",email:"",message:""});
   };
