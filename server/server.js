@@ -33,7 +33,7 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.log("MongoDB Connection Error:", err));
 
 /* ------------------ Contact Model ------------------ */
-const Contact = require("./models/contact");
+const Contact = require("./models/Contact");
 
 /* ------------------ Email Setup (Render Compatible) ------------------ */
 const transporter = nodemailer.createTransport({
@@ -58,7 +58,7 @@ transporter.verify((error, success) => {
 });
 
 /* ------------------ Contact Route ------------------ */
-app.post("/contact", async (req, res) => {
+app.post("/Contact", async (req, res) => {
   try {
     const { name, email, message } = req.body;
 
