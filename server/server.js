@@ -1,61 +1,54 @@
-// 1️⃣ IMPORTS
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-require("dotenv").config();
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 const nodemailer = require("nodemailer");
-
 const Groq = require("groq-sdk");
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+require("dotenv").config();
 
-//middleware
+const app = express();
+
+/* ------------------ CORS FIX (Vercel + Localhost) ------------------ */
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://vercel.com/pratikm56s-projects/pratik-dev"
+  "https://pratik-dev.vercel.app" // <-- replace if your vercel link is different
 ];
 
 app.use(cors({
-  origin: function(origin, callback){
-    if(!origin) return callback(null, true);
-    if(allowedOrigins.indexOf(origin) === -1){
-      return callback(new Error("CORS policy blocked this origin."), false);
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      return callback(new Error("CORS blocked this request"));
     }
     return callback(null, true);
   },
+  methods: ["GET", "POST"],
   credentials: true
 }));
 
-// 2️⃣ APP
-const app = express();
+app.use(express.json());
 
-
-
-
-// 4️⃣ TEST ROUTE
-app.get("/", (req, res) => {
-  res.send("Portfolio Server Running");
-});
-
-// 5️⃣ DATABASE CONNECTION
-console.log("ENV VALUE =>", process.env.MONGO_URI);
+/* ------------------ MongoDB Connection ------------------ */
 mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log("MongoDB Connected"))
-.catch(err => console.log("MongoDB Connection Error:", err));
+  .then(() => console.log("MongoDB Connected"))
+  .catch(err => console.log("MongoDB Connection Error:", err));
 
-// EMAIL TRANSPORTER
+/* ------------------ Contact Model ------------------ */
+const Contact = require("./models/contact");
+
+/* ------------------ Email Setup (Render Compatible) ------------------ */
 const transporter = nodemailer.createTransport({
   service: "gmail",
   port: 587,
   secure: false,
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    pass: process.env.EMAIL_PASS
   },
   tls: {
-    rejectUnauthorized: false,
-  },
+    rejectUnauthorized: false
+  }
 });
+
 transporter.verify((error, success) => {
   if (error) {
     console.log("SMTP ERROR:", error);
@@ -64,48 +57,38 @@ transporter.verify((error, success) => {
   }
 });
 
-// 6️⃣ IMPORT MODEL
-const Contact = require("./models/Contact");
-
-// 7️⃣ CONTACT ROUTE
+/* ------------------ Contact Route ------------------ */
 app.post("/contact", async (req, res) => {
   try {
     const { name, email, message } = req.body;
 
-    // Save to database
     const newContact = new Contact({ name, email, message });
     await newContact.save();
 
-    // Send email notification
-    const mailOptions = {
-  from: `"Pratik Portfolio" <${process.env.EMAIL_USER}>`,
-  to: process.env.EMAIL_USER,
-  replyTo: email,
-  subject: `New message from ${name}`,
-  html: `
-    <h2>New Portfolio Contact</h2>
-    <p><b>Name:</b> ${name}</p>
-    <p><b>Email:</b> ${email}</p>
-    <p><b>Message:</b></p>
-    <p>${message}</p>
-    <hr/>
-    <p>You can directly reply to this email to contact them.</p>
-  `,
-};
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_USER,
+      subject: "New Portfolio Contact Message",
+      html: `
+        <h3>New Message from Portfolio</h3>
+        <p><b>Name:</b> ${name}</p>
+        <p><b>Email:</b> ${email}</p>
+        <p><b>Message:</b><br/> ${message}</p>
+      `
+    });
 
-    await transporter.sendMail(mailOptions);
-    console.log("EMAIL SENT SUCCESSFULLY");
+    res.json({ msg: "Message sent successfully" });
 
-    res.json({ msg: "Message sent and email delivered!" });
-
-  } catch (error) {
-    console.log("Mail error:", error);
-    res.status(500).json({ msg: "Error sending message" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ msg: "Server Error" });
   }
 });
 
-// 8️⃣ START SERVER (ALWAYS LAST)
-
+/* ------------------ GROQ AI Chatbot ------------------ */
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY
+});
 
 app.post("/chat", async (req, res) => {
   try {
@@ -114,31 +97,35 @@ app.post("/chat", async (req, res) => {
     const completion = await groq.chat.completions.create({
       messages: [
         {
-        role: "system",
-        content: `
-        You are Pratik's portfolio AI assistant.
+          role: "system",
+          content: `
+You are a professional AI assistant for Pratik, a MERN Stack Developer.
 
-        STRICT RULES:
-        - Answer in MAXIMUM 3 short sentences.
-        - Do NOT write paragraphs.
-        - Keep replies under 70 words.
-        - Be direct and professional.
-        - If explanation is long, summarize it.
-        `
+Details:
+Name: Pratik
+Location: Bengaluru, India
+Skills: Java, JavaScript, React, Node.js, MongoDB, Python
+
+Projects:
+1. FilmyAdda - OTT movie web app
+2. TextFlow - Text formatting tool
+3. FlappyBird - Python game
+
+Contact Email: pratikmungaravadi8296@gmail.com
+
+Answer politely and professionally like a personal portfolio assistant.
+          `
         },
         {
           role: "user",
           content: userMessage
         }
       ],
-      model: "llama-3.1-8b-instant",
-        temperature: 0.7,
-            max_tokens: 150
+      model: "llama-3.3-70b-versatile"
     });
 
-    res.json({
-      reply: completion.choices[0].message.content
-    });
+    const reply = completion.choices[0].message.content;
+    res.json({ reply });
 
   } catch (error) {
     console.log("Groq error:", error);
@@ -146,5 +133,14 @@ app.post("/chat", async (req, res) => {
   }
 });
 
+/* ------------------ Health Route (Important for Render) ------------------ */
+app.get("/", (req, res) => {
+  res.send("Portfolio Server Running");
+});
+
+/* ------------------ Server Start ------------------ */
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
