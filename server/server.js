@@ -10,11 +10,9 @@ const Groq = require("groq-sdk");
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 //middleware
-const cors = require("cors");
-
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://pratik-dev.vercel.app"
+  "https://vercel.com/pratikm56s-projects/pratik-dev"
 ];
 
 app.use(cors({
