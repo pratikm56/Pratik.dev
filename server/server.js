@@ -30,7 +30,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 /* ================= Contact Model ================= */
 
-const Contact = require("./models/contact");
+const Contact = require("./models/Contact");
 
 /* ================= Email Setup ================= */
 
@@ -52,7 +52,7 @@ transporter.verify((error) => {
 
 /* ================= Contact Route ================= */
 
-app.post("/contact", async (req, res) => {
+app.post("/Contact", async (req, res) => {
   try {
     const { name, email, message } = req.body;
 
