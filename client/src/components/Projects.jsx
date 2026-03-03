@@ -15,6 +15,16 @@ export default function Projects() {
       title: "FlappyBird",
       desc: "Desktop game built with physics and collision detection.",
       tech: ["Python", "Pygame"]
+    },
+    {
+      title: "Portfolio Website",
+      desc: "Personal portfolio showcasing projects and skills.",
+      tech: ["React", "Tailwind CSS"]
+    },
+    {
+      title: "Personal ChatBot",
+      desc: "Real-time chatbot with natural language processing capabilities.",
+      tech: ["Node","MongoDB"]
     }
   ];
 
